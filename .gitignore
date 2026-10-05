@@ -1,0 +1,23 @@
+# Secrets
+.env
+
+# Environnement virtuel
+.venv/
+
+# Données brutes (scraping + carte PDF) : jamais commitées
+data/raw/
+
+# Index vectoriel généré (reconstructible)
+chroma_db/
+data/chroma/
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Éditeurs / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

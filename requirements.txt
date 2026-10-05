@@ -1,0 +1,29 @@
+# --- Scraping (étape 1)
+requests>=2.31
+beautifulsoup4>=4.12
+lxml>=5.0
+trafilatura>=1.8
+protego>=0.3
+
+# --- Ingestion : PDF, chunking, indexation (étape 2)
+pypdf>=4.0
+langchain>=0.3
+# 0.4.2 a supprimé chat_models.vertexai, encore importé par ragas 0.4.3
+langchain-community==0.4.1
+langchain-text-splitters>=0.3
+langchain-chroma>=0.1
+langchain-huggingface>=0.1
+chromadb>=0.5
+sentence-transformers>=3.0
+
+# --- LLM (étape 3-4) : clé API lue depuis .env
+python-dotenv>=1.0
+
+# --- Interface (étape 5)
+streamlit>=1.38
+
+# --- Évaluation (étape 6)
+ragas>=0.2
+
+# --- Tests
+pytest>=8.0
