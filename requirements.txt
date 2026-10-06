@@ -6,7 +6,7 @@ trafilatura>=1.8
 protego>=0.3
 
 # --- Ingestion : PDF, chunking, indexation (étape 2)
-pypdf>=4.0
+pymupdf>=1.24          # lit la position et la police de chaque ligne du PDF
 langchain>=0.3
 # 0.4.2 a supprimé chat_models.vertexai, encore importé par ragas 0.4.3
 langchain-community==0.4.1
