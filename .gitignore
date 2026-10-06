@@ -21,3 +21,7 @@ __pycache__/
 .idea/
 .DS_Store
 Thumbs.db
+
+# Données nettoyées : contenu du site du traiteur, pas publié sans accord
+data/processed/*
+!data/processed/.gitkeep

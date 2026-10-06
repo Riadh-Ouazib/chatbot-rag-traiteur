@@ -1,0 +1,66 @@
+"""Tests du nettoyage des pages scrapées (étape 2a)."""
+
+import pytest
+
+from src.ingestion.clean_pages import (
+    CLEAN_FILE,
+    clean_pages,
+    clean_text,
+    clean_title,
+    find_boilerplate,
+    load_pages,
+)
+
+MENU = "Mon panier\nCarte traiteur\nBuffet\n"
+
+
+def make_page(url: str, body: str) -> dict:
+    return {"url": url, "title": "Titre | Traiteur démo", "description": "", "text": MENU + body}
+
+
+def test_boilerplate_detecte_le_menu_repete():
+    pages = [make_page(f"https://x.com/p{i}", f"Contenu unique numéro {i}") for i in range(5)]
+    boilerplate = find_boilerplate(pages)
+    assert {"Mon panier", "Carte traiteur", "Buffet"} <= boilerplate
+    assert "Contenu unique numéro 0" not in boilerplate
+
+
+def test_clean_text_retire_bruit_et_garde_paragraphes():
+    text = "Intro\n\n10\n11\n12\nshopping\\_cart\nAjouter au panier\n\nSuite du texte"
+    cleaned = clean_text(text, boilerplate={"shopping_cart"})
+    assert cleaned == "Intro\n\nSuite du texte"
+
+
+def test_clean_text_retire_prix_et_bouton_dans_une_ligne():
+    line = "Box tarte Prix 40,00 € HT 44,00 € TTC Ajouter au panier"
+    assert clean_text(line, set()) == "Box tarte 40,00 € HT 44,00 € TTC"
+
+
+@pytest.mark.parametrize("raw, expected", [
+    ("Plateau cocktail  Traiteur démo", "Plateau cocktail"),
+    ("Traiteur végétarien | Traiteur d&eacute;mo", "Traiteur végétarien"),
+    ("Animation musicale | Traiteur démo", "Animation musicale"),
+    ("Buffet traiteur - Traiteur démo", "Buffet traiteur"),
+    ("Traiteur démo", "Accueil"),
+])
+def test_clean_title(raw, expected):
+    assert clean_title(raw) == expected
+
+
+def test_doublons_fusionnes_en_gardant_url_courte():
+    body = "Un texte identique suffisamment long pour ne pas être filtré comme page vide."
+    pages = [make_page("https://x.com/plateau-repas/", body), make_page("https://x.com/plateau-repas", body)]
+    result = clean_pages(pages)
+    assert [p["url"] for p in result] == ["https://x.com/plateau-repas"]
+
+
+@pytest.mark.skipif(not CLEAN_FILE.exists(), reason="lancer d'abord clean_pages")
+def test_donnees_reelles_sans_bruit_et_pages_cles_presentes():
+    pages = load_pages(CLEAN_FILE)
+    for page in pages:
+        assert "Mon panier" not in page["text"]
+        assert "shopping_cart" not in page["text"]
+    urls = {p["url"].rstrip("/") for p in pages}
+    for path in ("/traiteur/livraison", "/buffet", "/cocktail", "/plateau-repas",
+                 "/traiteur/vegetarien", "/traiteur/conditions-generales-de-vente"):
+        assert f"https://www.exemple-traiteur.fr{path}" in urls, path
