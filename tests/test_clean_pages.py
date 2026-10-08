@@ -36,6 +36,16 @@ def test_clean_text_retire_prix_et_bouton_dans_une_ligne():
     assert clean_text(line, set()) == "Box tarte 40,00 € HT 44,00 € TTC"
 
 
+def test_clean_text_retire_les_regles_contredites_par_la_carte():
+    text = ("- Pour les buffets : sur commande 48h à l’avance (sauf dernière minute, la veille avant 17h).\n"
+            "Vos plateaux peuvent être commandés jusqu'à 17h la veille.\n"
+            "Commandes « dernière minute » après 17h, majorés de 15 euros.\n"
+            "Livraison 7 jours sur 7, de 7h00 à 20h00.\n"
+            "Tarifs doublés pour les commandes passées après 17h00 ou avant 10h00.")
+    assert clean_text(text, set()) == ("Livraison 7 jours sur 7, de 7h00 à 20h00.\n"
+                                       "Tarifs doublés pour les commandes passées après 17h00 ou avant 10h00.")
+
+
 @pytest.mark.parametrize("raw, expected", [
     ("Plateau cocktail  Traiteur démo", "Plateau cocktail"),
     ("Traiteur végétarien | Traiteur d&eacute;mo", "Traiteur végétarien"),
@@ -60,6 +70,7 @@ def test_donnees_reelles_sans_bruit_et_pages_cles_presentes():
     for page in pages:
         assert "Mon panier" not in page["text"]
         assert "shopping_cart" not in page["text"]
+        assert "avant 17h" not in page["text"], page["url"]  # la carte (16h) fait foi
     urls = {p["url"].rstrip("/") for p in pages}
     for path in ("/traiteur/livraison", "/buffet", "/cocktail", "/plateau-repas",
                  "/traiteur/vegetarien", "/traiteur/conditions-generales-de-vente"):

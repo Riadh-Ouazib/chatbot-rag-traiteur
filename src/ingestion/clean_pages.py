@@ -8,7 +8,8 @@ Ce que fait le script :
   1. Retire le "boilerplate" : les lignes courtes répétées sur beaucoup de pages
      (menu du site, "Mon panier"...) et le bruit d'interface (boutons, filtres, 10..100).
   2. Corrige l'échappement Markdown laissé par trafilatura ("\\_", "\\-").
-  3. Supprime les pages vides ou sans intérêt, et les doublons (même texte nettoyé).
+  3. Retire les règles du site contredites par la carte PDF, plus récente (délais 17h -> 16h).
+  4. Supprime les pages vides ou sans intérêt, et les doublons (même texte nettoyé).
 
 Lancement (depuis la racine du projet) :
     python -m src.ingestion.clean_pages
@@ -43,8 +44,18 @@ UI_NOISE = re.compile(
 # Restes de vignettes produit au milieu d'une ligne
 INLINE_NOISE = re.compile(r"\s*\b(Prix|Ajouter au panier)\b\s*")
 
-# Pages sans valeur pour répondre aux clients
-EXCLUDED_PATHS = {"/traiteur/credits"}
+# Pages sans valeur pour répondre aux clients.
+# "nous-rejoindre" contient une ancienne FAQ des délais (17h), reprise à jour dans la carte p. 2.
+EXCLUDED_PATHS = {"/traiteur/credits", "/traiteur/nous-rejoindre"}
+
+# Règles du site qui contredisent la carte Automne-Hiver 2026/2027 (document le plus récent,
+# qui fait foi) : délai de commande "la veille avant 17h" (carte : 16h) et majoration
+# "dernière minute" de 15 € (carte : +100 %). Ces lignes sont retirées.
+OUTDATED_RULES = re.compile(
+    r"veille[^.]*\b(avant|jusqu.à) 17h|(avant|jusqu.à) 17h[^.]*veille"
+    r"|entre 17h et 18h30|majorés de 15 euros",
+    re.IGNORECASE,
+)
 
 
 def load_pages(path: Path) -> list[dict]:
@@ -73,11 +84,11 @@ def find_boilerplate(pages: list[dict]) -> set[str]:
 
 
 def clean_text(text: str, boilerplate: set[str]) -> str:
-    """Nettoie le texte d'une page : boilerplate, bruit d'interface, lignes vides en trop."""
+    """Nettoie le texte d'une page : boilerplate, bruit d'interface, règles obsolètes, lignes vides."""
     kept = []
     for line in unescape_markdown(text).splitlines():
         stripped = line.strip()
-        if stripped in boilerplate or UI_NOISE.match(stripped):
+        if stripped in boilerplate or UI_NOISE.match(stripped) or OUTDATED_RULES.search(stripped):
             continue
         kept.append(INLINE_NOISE.sub(" ", line).rstrip())
     return re.sub(r"\n{3,}", "\n\n", "\n".join(kept)).strip()
