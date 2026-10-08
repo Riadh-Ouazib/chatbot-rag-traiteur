@@ -16,7 +16,8 @@ langchain-huggingface>=0.1
 chromadb>=0.5
 sentence-transformers>=3.0
 
-# --- LLM (étape 3-4) : clé API lue depuis .env
+# --- LLM (étape 3-4) : modèle local via Ollama (qwen3:4b-instruct-2507)
+langchain-ollama>=1.0
 python-dotenv>=1.0
 
 # --- Interface (étape 5)
