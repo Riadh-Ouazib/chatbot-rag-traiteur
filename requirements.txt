@@ -18,6 +18,7 @@ sentence-transformers>=3.0
 
 # --- LLM (étape 3-4) : modèle local via Ollama (qwen3:4b-instruct-2507)
 langchain-ollama>=1.0
+holidays>=0.50          # jours fériés français (majoration des frais de livraison)
 python-dotenv>=1.0
 
 # --- Interface (étape 5)

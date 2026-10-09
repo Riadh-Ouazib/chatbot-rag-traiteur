@@ -116,3 +116,49 @@ def test_allergenes_macarons_liste_complete(ask):
     result = ask("Les mini macarons contiennent-ils des fruits à coque ?")
     assert "arachides, fruits à coque, gluten, lactose, lupin, œufs, soja, sésame, sulfites" in result.text
     assert any("p. 24" in citation for _, citation in result.sources)
+
+
+# ---------------------------------------------------------------- étape 4 : routage et outil
+@pytest.mark.parametrize("question, expected", [
+    ("Combien coûte la livraison à Boulogne ?", True),
+    ("Quel est le tarif pour livrer au 75015 samedi ?", True),
+    ("Frais de livraison à Paris ?", True),
+    ("Livrez-vous le dimanche ?", False),           # question de règle : RAG
+    ("Combien coûte le plateau Tablée automnale ?", False),
+])
+def test_routage_question_de_frais_de_livraison(question, expected):
+    from src.rag.chain import is_delivery_cost_question
+    assert is_delivery_cost_question(question) is expected
+
+
+def test_calendrier_donne_les_dates_avec_leur_nom():
+    from datetime import date
+    from src.rag.prompt import calendar
+    text = calendar(date(2026, 10, 11))
+    assert "- dimanche 2026-10-11 (aujourd'hui)" in text
+    assert "- samedi 2026-10-17" in text
+
+
+def test_budget_de_contexte_garde_le_premier_et_saute_les_trop_longs():
+    from src.rag.retriever import fit_budget
+    short, long_ = Document(page_content="a" * 100), Document(page_content="b" * 5000)
+    assert fit_budget([long_, long_, short], max_chars=5200) == [long_, short]
+
+
+@llm
+def test_frais_de_livraison_calcules_par_l_outil(ask):
+    from datetime import date, timedelta
+    from decimal import Decimal
+    from src.tools.delivery import day_multiplier
+    saturday = date.today() + timedelta(days=(5 - date.today().weekday()) % 7 or 7)
+    expected = (Decimal("39.70") * day_multiplier(saturday)[0]).quantize(Decimal("0.01"))
+    result = ask("Combien coûte la livraison à Boulogne-Billancourt samedi ?")
+    assert result.quotes and result.quotes[0].ok
+    assert result.quotes[0].total_ht == expected
+    assert f"{expected}".replace(".", ",") in result.text
+
+
+@llm
+def test_question_de_regle_de_livraison_sans_outil(ask):
+    result = ask("Livrez-vous le dimanche ?")
+    assert not result.quotes and result.sources
