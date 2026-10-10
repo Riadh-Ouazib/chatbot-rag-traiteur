@@ -5,8 +5,6 @@ Le LLM ne sert pas de source de connaissance : il reformule les extraits numéro
 donne ("grounding"). Les numéros [n] qu'il cite sont ensuite traduits en sources par le code.
 """
 
-from datetime import date, timedelta
-
 from langchain_core.documents import Document
 
 TEAM_CONTACT = "01 00 00 00 00 / contact@exemple-traiteur.fr"
@@ -36,8 +34,7 @@ DELIVERY_PROMPT = f"""Tu es l'assistant du traiteur Traiteur démo. Le client de
 
 1. Appelle l'outil calculer_frais_livraison :
    - lieu : le code postal ou la ville, tel que le client l'a écrit ;
-   - date_livraison : seulement si le client donne un jour, au format AAAA-MM-JJ,
-     recopiée du calendrier ci-dessous ;
+   - date_livraison : ne la remplis pas, la date est lue dans la question par le code ;
    - derniere_minute : vrai seulement si le client dit commander après 17h la veille
      ou le matin même avant 10h.
 2. Si le client ne donne aucun lieu, n'appelle pas l'outil : demande-lui son code postal.
@@ -54,15 +51,6 @@ def format_context(docs: list[Document]) -> str:
 
 
 WEEKDAYS = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"]
-
-
-def calendar(today: date) -> str:
-    """Les 8 prochains jours avec leur nom : un petit modèle recopie une date plus sûrement
-    qu'il ne calcule "samedi prochain" lui-même."""
-    days = [today + timedelta(days=i) for i in range(8)]
-    lines = [f"- {WEEKDAYS[d.weekday()]} {d.isoformat()}" + (" (aujourd'hui)" if d == today else "")
-             for d in days]
-    return "Calendrier :\n" + "\n".join(lines)
 
 
 def build_messages(question: str, docs: list[Document]) -> list:
@@ -96,6 +84,6 @@ def build_condense_messages(history: list[tuple[str, str]], question: str) -> li
             ("human", f"Dialogue :\n{dialogue}\n\nNouvelle question : {question}")]
 
 
-def build_delivery_messages(question: str, today: date | None = None) -> list:
-    """Messages pour une question de frais de livraison : consignes de l'outil + calendrier."""
-    return [("system", f"{DELIVERY_PROMPT}\n\n{calendar(today or date.today())}"), ("human", question)]
+def build_delivery_messages(question: str) -> list:
+    """Messages pour une question de frais de livraison : consignes de l'outil + question."""
+    return [("system", DELIVERY_PROMPT), ("human", question)]

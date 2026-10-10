@@ -40,6 +40,7 @@ from src.rag.prompt import (
     build_messages,
 )
 from src.rag.retriever import DEFAULT_STRATEGY, retrieve
+from src.tools.dates import parse_delivery_date
 from src.tools.delivery import GRID_SOURCE, DeliveryQuote, ask_team, calculer_frais_livraison
 
 # Version "instruct" : répond directement, sans phase de réflexion (la version "thinking"
@@ -191,12 +192,18 @@ def standalone_question(question: str, history: list[tuple[str, str]] | None) ->
 
 
 # ---------------------------------------------------------------- outil de livraison
-def run_tool_call(call: dict) -> DeliveryQuote:
-    """Exécute un appel d'outil demandé par le LLM (arguments invalides -> renvoi vers l'équipe)."""
+def run_tool_call(call: dict, question: str) -> DeliveryQuote:
+    """Exécute un appel d'outil demandé par le LLM (arguments invalides -> renvoi vers l'équipe).
+
+    Le LLM fournit le lieu ; la date est lue dans la question par le code (parse_delivery_date),
+    jamais prise au LLM : il recopiait des dates fausses (bug trouvé par l'évaluation).
+    """
     if call["name"] != calculer_frais_livraison.__name__:
         return ask_team(f"Outil inconnu : {call['name']}.")
+    delivery_day = parse_delivery_date(question)
+    args = {**call["args"], "date_livraison": delivery_day.isoformat() if delivery_day else None}
     try:
-        return calculer_frais_livraison(**call["args"])
+        return calculer_frais_livraison(**args)
     except TypeError:
         return ask_team("Je n'ai pas compris le lieu ou la date de livraison.")
 
@@ -213,7 +220,7 @@ def answer_delivery(question: str) -> Answer:
     reply: AIMessage = get_llm(with_tools=True).invoke(messages)
     if not reply.tool_calls:  # pas de lieu dans la question : le LLM demande le code postal
         return Answer(text=str(reply.content).strip(), question=question)
-    quotes = [run_tool_call(call) for call in reply.tool_calls]
+    quotes = [run_tool_call(call, question) for call in reply.tool_calls]
     if not any(quote.ok for quote in quotes):  # aucun prix : le message de l'outil suffit
         return Answer(text="\n\n".join(q.message for q in quotes), quotes=quotes, question=question)
     messages += [reply] + [ToolMessage(content=quote.message, tool_call_id=call["id"])

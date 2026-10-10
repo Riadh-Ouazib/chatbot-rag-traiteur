@@ -25,3 +25,6 @@ Thumbs.db
 # Données nettoyées : contenu du site du traiteur, pas publié sans accord
 data/processed/*
 !data/processed/.gitkeep
+
+# Évaluation : les réponses détaillées reprennent le contenu du traiteur (scores et résumé commités)
+eval/results/answers_*.jsonl

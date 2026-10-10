@@ -133,14 +133,6 @@ def test_routage_question_de_frais_de_livraison(question, expected):
     assert is_delivery_cost_question(question) is expected
 
 
-def test_calendrier_donne_les_dates_avec_leur_nom():
-    from datetime import date
-    from src.rag.prompt import calendar
-    text = calendar(date(2026, 10, 11))
-    assert "- dimanche 2026-10-11 (aujourd'hui)" in text
-    assert "- samedi 2026-10-17" in text
-
-
 def test_budget_de_contexte_garde_le_premier_et_saute_les_trop_longs():
     from src.rag.retriever import fit_budget
     short, long_ = Document(page_content="a" * 100), Document(page_content="b" * 5000)
