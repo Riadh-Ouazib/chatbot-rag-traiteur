@@ -1,0 +1,7 @@
+# Configuration Streamlit du projet (lue au lancement depuis la racine)
+[server]
+# Accessible seulement depuis ce PC : le bot affiche le contenu du traiteur, pas de partage réseau
+address = "localhost"
+
+[browser]
+gatherUsageStats = false

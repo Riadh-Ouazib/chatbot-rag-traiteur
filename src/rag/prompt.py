@@ -72,6 +72,30 @@ def build_messages(question: str, docs: list[Document]) -> list:
     return [("system", system), ("human", user)]
 
 
+CONDENSE_PROMPT = """Tu aides l'assistant d'un traiteur à comprendre une question de suivi.
+Réécris la NOUVELLE question du client pour qu'elle soit compréhensible seule, en reprenant
+du dialogue ce qui manque (produit, lieu, date...). Si elle est déjà compréhensible seule,
+ou si elle change de sujet, recopie-la telle quelle.
+Réponds uniquement par la question réécrite, sans explication.
+
+Exemples :
+- Dialogue : "Combien coûte la livraison au 75008 ?" / Nouvelle question : "Et le dimanche ?"
+  -> Combien coûte la livraison au 75008 le dimanche ?
+- Dialogue : "Les choux contiennent-ils du lactose ?" / Nouvelle question : "Et les macarons ?"
+  -> Les macarons contiennent-ils du lactose ?
+- Dialogue : "Quels délais pour un buffet ?" / Nouvelle question : "Faites-vous des plats végans ?"
+  -> Faites-vous des plats végans ?"""
+
+MAX_HISTORY_ANSWER_CHARS = 300  # réponses précédentes tronquées : le contexte est limité
+
+
+def build_condense_messages(history: list[tuple[str, str]], question: str) -> list:
+    """Messages pour reformuler une question de suivi à partir des derniers échanges."""
+    dialogue = "\n".join(f"Client : {q}\nAssistant : {a[:MAX_HISTORY_ANSWER_CHARS]}" for q, a in history)
+    return [("system", CONDENSE_PROMPT),
+            ("human", f"Dialogue :\n{dialogue}\n\nNouvelle question : {question}")]
+
+
 def build_delivery_messages(question: str, today: date | None = None) -> list:
     """Messages pour une question de frais de livraison : consignes de l'outil + calendrier."""
     return [("system", f"{DELIVERY_PROMPT}\n\n{calendar(today or date.today())}"), ("human", question)]

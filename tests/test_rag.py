@@ -10,9 +10,10 @@ from langchain_core.documents import Document
 from src.ingestion.vectorstore import CHROMA_DIR
 from src.rag.chain import (
     LLM_MODEL,
-    add_allergen_notice,
+    allergen_notices,
     build_sources,
     cited_numbers,
+    format_answer,
     remove_invalid_citations,
 )
 from src.rag.prompt import TEAM_CONTACT, build_messages, format_context
@@ -60,13 +61,14 @@ def test_sources_traduites_et_regroupees():
 
 
 def test_allergenes_liste_officielle_recopiee_et_avertissement():
-    text = add_allergen_notice("Les macarons contiennent-ils du gluten ?", "Oui [1].", [CARTE_DOC])
-    assert "MINI MACARONS [1] — Allergènes : gluten, œufs." in text
-    assert "contaminations croisées" in text and TEAM_CONTACT in text
+    allergens, warning = allergen_notices("Les macarons contiennent-ils du gluten ?", "Oui [1].", [CARTE_DOC])
+    assert allergens.kind == "allergens" and "MINI MACARONS [1] — Allergènes : gluten, œufs." in allergens.text
+    assert warning.kind == "warning"
+    assert "contaminations croisées" in warning.text and TEAM_CONTACT in warning.text
 
 
 def test_pas_d_avertissement_hors_allergenes():
-    assert add_allergen_notice("Quels délais ?", "48h [1].", [CARTE_DOC]) == "48h [1]."
+    assert allergen_notices("Quels délais ?", "48h [1].", [CARTE_DOC]) == []
 
 
 # ---------------------------------------------------------------- bout en bout (LLM réel)
@@ -100,7 +102,7 @@ def test_delai_plateaux_repas_16h_cite_la_carte(ask):
 def test_question_hors_sujet_renvoie_vers_l_equipe(ask):
     result = ask("Quelle est la capitale de l'Australie ?")
     assert "Canberra" not in result.text
-    assert "01 00 00 00 00" in result.text
+    assert "01 00 00 00 00" in format_answer(result)
 
 
 @llm
@@ -108,13 +110,13 @@ def test_produit_sans_allergenes_indiques_renvoie_vers_l_equipe(ask):
     result = ask("Quels allergènes dans les brochettes de fruits ?")
     assert "non indiqués" in result.text
     assert "gluten" not in result.text.lower()
-    assert "01 00 00 00 00" in result.text
+    assert "01 00 00 00 00" in format_answer(result)
 
 
 @llm
 def test_allergenes_macarons_liste_complete(ask):
     result = ask("Les mini macarons contiennent-ils des fruits à coque ?")
-    assert "arachides, fruits à coque, gluten, lactose, lupin, œufs, soja, sésame, sulfites" in result.text
+    assert "arachides, fruits à coque, gluten, lactose, lupin, œufs, soja, sésame, sulfites" in format_answer(result)
     assert any("p. 24" in citation for _, citation in result.sources)
 
 
@@ -155,10 +157,26 @@ def test_frais_de_livraison_calcules_par_l_outil(ask):
     result = ask("Combien coûte la livraison à Boulogne-Billancourt samedi ?")
     assert result.quotes and result.quotes[0].ok
     assert result.quotes[0].total_ht == expected
-    assert f"{expected}".replace(".", ",") in result.text
+    assert f"{expected}".replace(".", ",") in format_answer(result)
 
 
 @llm
 def test_question_de_regle_de_livraison_sans_outil(ask):
     result = ask("Livrez-vous le dimanche ?")
     assert not result.quotes and result.sources
+
+
+# ---------------------------------------------------------------- étape 5 : questions de suivi
+@llm
+def test_question_de_suivi_reformulee_puis_calculee_par_l_outil(ask):
+    first = ask("Combien coûte la livraison au 92100 ?")
+    follow_up = ask("Et si c'est un samedi ?", history=[("Combien coûte la livraison au 92100 ?", first.text)])
+    assert "92100" in follow_up.question and "samedi" in follow_up.question.lower()
+    assert follow_up.quotes and follow_up.quotes[0].ok
+    assert "samedi" in follow_up.quotes[0].message
+
+
+@llm
+def test_sans_historique_pas_de_reformulation(ask):
+    question = "Quels sont les délais pour un buffet ?"
+    assert ask(question).question == question
