@@ -172,3 +172,15 @@ def test_question_de_suivi_reformulee_puis_calculee_par_l_outil(ask):
 def test_sans_historique_pas_de_reformulation(ask):
     question = "Quels sont les délais pour un buffet ?"
     assert ask(question).question == question
+
+
+def test_nom_du_traiteur_configurable(monkeypatch):
+    import importlib
+    import src.rag.prompt as prompt
+    monkeypatch.setenv("BRAND_NAME", "Traiteur démo")
+    try:
+        reloaded = importlib.reload(prompt)
+        assert "Traiteur démo" in reloaded.SYSTEM_PROMPT and "exemple" not in reloaded.SYSTEM_PROMPT
+    finally:
+        monkeypatch.delenv("BRAND_NAME")
+        importlib.reload(prompt)

@@ -34,6 +34,7 @@ from ollama import ResponseError
 
 from src.ingestion.chunking import carte_citation
 from src.rag.prompt import (
+    BRAND_NAME,
     TEAM_CONTACT,
     build_condense_messages,
     build_delivery_messages,
@@ -62,7 +63,7 @@ DELIVERY_WORD = re.compile(r"\blivr", re.IGNORECASE)
 PRICE_WORD = re.compile(r"combien|co[uû]t|prix|tarif|frais|€|euros?\b", re.IGNORECASE)
 
 # Avertissement de la carte (p. 2), ajouté par le code dès qu'on parle d'allergènes
-CROSS_CONTAMINATION = ("Traiteur démo ne peut garantir l'absence totale d'allergènes "
+CROSS_CONTAMINATION = (f"{BRAND_NAME} ne peut garantir l'absence totale d'allergènes "
                        "(contaminations croisées possibles en production).")
 CROSS_CONTAMINATION_SOURCE = carte_citation({"printed_page": None, "pdf_page": 2})
 

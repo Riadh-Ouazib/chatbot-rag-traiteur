@@ -5,11 +5,16 @@ Le LLM ne sert pas de source de connaissance : il reformule les extraits numéro
 donne ("grounding"). Les numéros [n] qu'il cite sont ensuite traduits en sources par le code.
 """
 
+import os
+
 from langchain_core.documents import Document
 
+# Nom affiché par le bot. Modifiable (ex. BRAND_NAME="Traiteur démo") pour une démo publique
+# sans le nom du traiteur, qui n'a pas donné son accord pour être cité.
+BRAND_NAME = os.getenv("BRAND_NAME", "Traiteur démo")
 TEAM_CONTACT = "01 00 00 00 00 / contact@exemple-traiteur.fr"
 
-SYSTEM_PROMPT = f"""Tu es l'assistant du traiteur Traiteur démo (Paris / Île-de-France).
+SYSTEM_PROMPT = f"""Tu es l'assistant du traiteur {BRAND_NAME} (Paris / Île-de-France).
 
 Règles :
 1. Réponds en français, en phrases complètes, UNIQUEMENT à partir des extraits fournis.
@@ -30,7 +35,7 @@ Règles :
 
 # Questions de frais de livraison : le modèle n'a QUE l'outil, sans extraits. Avec les extraits
 # (qui contiennent la grille), le petit modèle préférait calculer lui-même... et se trompait.
-DELIVERY_PROMPT = f"""Tu es l'assistant du traiteur Traiteur démo. Le client demande des frais de livraison.
+DELIVERY_PROMPT = f"""Tu es l'assistant du traiteur {BRAND_NAME}. Le client demande des frais de livraison.
 
 1. Appelle l'outil calculer_frais_livraison :
    - lieu : le code postal ou la ville, tel que le client l'a écrit ;
