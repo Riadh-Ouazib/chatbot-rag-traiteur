@@ -7,6 +7,7 @@ ou l'index Chroma ne sont pas disponibles (~5-15 s par question sur un GPU de po
 import pytest
 from langchain_core.documents import Document
 
+from src.config import TEAM_PHONE
 from src.ingestion.vectorstore import CHROMA_DIR
 from src.rag.chain import (
     LLM_MODEL,
@@ -102,7 +103,7 @@ def test_delai_plateaux_repas_16h_cite_la_carte(ask):
 def test_question_hors_sujet_renvoie_vers_l_equipe(ask):
     result = ask("Quelle est la capitale de l'Australie ?")
     assert "Canberra" not in result.text
-    assert "01 00 00 00 00" in format_answer(result)
+    assert TEAM_PHONE in format_answer(result)
 
 
 @llm
@@ -110,7 +111,7 @@ def test_produit_sans_allergenes_indiques_renvoie_vers_l_equipe(ask):
     result = ask("Quels allergènes dans les brochettes de fruits ?")
     assert "non indiqués" in result.text
     assert "gluten" not in result.text.lower()
-    assert "01 00 00 00 00" in format_answer(result)
+    assert TEAM_PHONE in format_answer(result)
 
 
 @llm
@@ -176,11 +177,13 @@ def test_sans_historique_pas_de_reformulation(ask):
 
 def test_nom_du_traiteur_configurable(monkeypatch):
     import importlib
+    import src.config as config
     import src.rag.prompt as prompt
-    monkeypatch.setenv("BRAND_NAME", "Traiteur démo")
+    monkeypatch.setenv("BRAND_NAME", "Nom de test")  # load_dotenv n'écrase pas une variable déjà définie
     try:
-        reloaded = importlib.reload(prompt)
-        assert "Traiteur démo" in reloaded.SYSTEM_PROMPT and "exemple" not in reloaded.SYSTEM_PROMPT
+        importlib.reload(config)
+        assert "traiteur Nom de test (Paris" in importlib.reload(prompt).SYSTEM_PROMPT
     finally:
         monkeypatch.delenv("BRAND_NAME")
+        importlib.reload(config)
         importlib.reload(prompt)

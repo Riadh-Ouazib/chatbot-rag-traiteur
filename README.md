@@ -7,8 +7,8 @@ Tout tourne en local : le LLM est qwen3 4B via Ollama, sur mon PC portable (RTX 
 
 ![Démo](docs/demo.gif)
 
-Projet perso, non affilié au traiteur. Le nom affiché par le bot se change avec la variable
-`BRAND_NAME`.
+Projet perso, non affilié au traiteur. Je n'ai pas leur accord pour les citer, donc leur nom,
+leur site et leurs contacts ne sont pas dans le repo : ils sont lus dans un fichier `.env` local.
 
 ## Ce que fait le bot
 
@@ -86,11 +86,13 @@ pip install -r requirements.txt
 ollama pull qwen3:4b-instruct-2507-q4_K_M
 ```
 
-Les données du traiteur ne sont pas dans le repo. La carte PDF est à télécharger à la main dans
+Copier `.env.example` en `.env` et mettre l'adresse du site et les infos du traiteur.
+
+Les données du traiteur ne sont pas dans le repo non plus. La carte PDF est à télécharger à la main dans
 `data/raw/` (le dossier `/upload/` du site est interdit aux robots dans son robots.txt), puis :
 
 ```bash
-python src/scraping/scrape_site.py
+python -m src.scraping.scrape_site
 python -m src.ingestion.clean_pages
 python -m src.ingestion.load_pdf
 python -m src.ingestion.build_index

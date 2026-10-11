@@ -5,6 +5,7 @@ common.py : Fonctions partagées par les scripts d'évaluation.
 import json
 import sys
 from pathlib import Path
+from urllib.parse import urlparse
 
 from langchain_core.documents import Document
 
@@ -37,11 +38,12 @@ def answers_file(strategy: str) -> Path:
 
 
 def source_key(doc: Document) -> str:
-    """Identifiant de source comparable entre stratégies : 'carte:13' (page du PDF) ou 'site:URL'.
+    """Identifiant de source comparable entre stratégies : 'carte:13' (page du PDF) ou 'site:/chemin'.
 
     On compare par page PDF et non par citation : en stratégie "recursive", un chunk de la
     carte reçoit la page imprimée du premier produit de la double page, pas forcément la bonne.
     """
     if doc.metadata["source_type"] == "carte":
         return f"carte:{doc.metadata['pdf_page']}"
-    return f"site:{doc.metadata['source']}"
+    # Chemin sans le domaine : le nom du site du traiteur n'apparaît pas dans eval/questions.jsonl
+    return f"site:{urlparse(doc.metadata['source']).path or '/'}"

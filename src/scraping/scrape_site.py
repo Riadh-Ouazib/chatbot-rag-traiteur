@@ -1,5 +1,5 @@
 """
-scrape_site.py : Collecter le contenu public du site Traiteur démo.
+scrape_site.py : Collecter le contenu public du site du traiteur (SITE_URL dans .env).
 
 Ce que fait le script :
   1. Lit robots.txt et ne visite QUE les pages autorisées.
@@ -13,7 +13,7 @@ Installation :
     pip install requests beautifulsoup4 lxml trafilatura protego
 
 Lancement :
-    python scrape_site.py
+    python -m src.scraping.scrape_site
 """
 
 import json
@@ -29,11 +29,13 @@ import trafilatura
 from bs4 import BeautifulSoup
 from protego import Protego
 
+from src.config import SCRAPER_CONTACT, SITE_URL
+
 # ---------------------------------------------------------------- réglages
-BASE = "https://www.exemple-traiteur.fr"
+BASE = SITE_URL
 DOMAIN = urlparse(BASE).netloc
 # Mets ton vrai email : c'est la façon polie de s'identifier quand on scrape.
-USER_AGENT = "RAGStudentProject/1.0 (projet etudiant; contact: ton.email@exemple.com)"
+USER_AGENT = f"RAGStudentProject/1.0 (projet etudiant; contact: {SCRAPER_CONTACT})"
 DELAY_SECONDS = 2.0      # pause entre deux requêtes pour ne pas surcharger leur serveur
 MAX_PAGES = 300          # garde-fou
 OUT_DIR = Path("data/raw")

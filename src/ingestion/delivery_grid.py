@@ -14,11 +14,15 @@ Lancement (depuis la racine du projet) :
 import json
 import re
 from pathlib import Path
+from urllib.parse import urlparse
+
+from src.config import SITE_URL
 
 ROOT = Path(__file__).resolve().parents[2]
 PAGES_FILE = ROOT / "data" / "processed" / "pages_clean.jsonl"
 GRID_FILE = ROOT / "data" / "processed" / "delivery_grid.json"
-DELIVERY_URL = "https://www.exemple-traiteur.fr/traiteur/livraison"
+DELIVERY_PATH = "/traiteur/livraison"
+DELIVERY_URL = f"{SITE_URL}{DELIVERY_PATH}"
 
 # "**Zone 2**, les tarifs sont de **39.70€ HT** (43.67€ TTC) :\n78110, 78140, ..."
 ZONE_BLOCK = re.compile(
@@ -34,7 +38,7 @@ def load_delivery_page(path: Path = PAGES_FILE) -> str:
     with open(path, encoding="utf-8") as f:
         for line in f:
             page = json.loads(line)
-            if page["url"].rstrip("/") == DELIVERY_URL:
+            if urlparse(page["url"]).path.rstrip("/") == DELIVERY_PATH:
                 return page["text"]
     raise FileNotFoundError(f"Page {DELIVERY_URL} absente de {path}")
 

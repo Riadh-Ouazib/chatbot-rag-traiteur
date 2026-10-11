@@ -10,6 +10,8 @@ from decimal import Decimal
 
 import pytest
 
+from src.config import TEAM_PHONE
+
 from src.ingestion import delivery_grid
 from src.ingestion.postal_codes import build_communes, normalize_name
 from src.tools import delivery
@@ -63,7 +65,7 @@ def test_derniere_minute_double_le_tarif_en_semaine():
 
 def test_derniere_minute_le_week_end_renvoie_vers_l_equipe():
     quote = calculer_frais_livraison("75001", SATURDAY, derniere_minute=True)
-    assert not quote.ok and "01 00 00 00 00" in quote.message
+    assert not quote.ok and TEAM_PHONE in quote.message
 
 
 def test_95100_present_dans_deux_zones_prend_la_zone_1():
@@ -94,7 +96,7 @@ def test_ville_sur_deux_zones_demande_le_code_postal():
 @pytest.mark.parametrize("place", ["9210", "abc123", "Lyon", "13001"])
 def test_lieu_invalide_ou_hors_zone(place):
     quote = calculer_frais_livraison(place)
-    assert not quote.ok and "01 00 00 00 00" in quote.message
+    assert not quote.ok and TEAM_PHONE in quote.message
 
 
 def test_date_invalide():

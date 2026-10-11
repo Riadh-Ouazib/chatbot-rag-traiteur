@@ -9,9 +9,9 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "eval"))
 
 from common import QUESTIONS_FILE, load_jsonl  # noqa: E402
-from score import check_rules, fmt, mean  # noqa: E402
+from score import CONTACT, check_rules, fmt, mean  # noqa: E402
 
-RECORD = {"rendered": "Commandez la veille avant 16h [1]. Contact : 01 00 00 00 00",
+RECORD = {"rendered": f"Commandez la veille avant 16h [1]. Contact : {CONTACT}",
           "notices": ["allergens", "warning"],
           "quotes": [{"ok": True, "total_ht": "59.55"}]}
 
@@ -45,7 +45,7 @@ def test_jeu_de_questions_complet_et_coherent():
     assert len({q["id"] for q in questions}) == 30
     for q in questions:
         assert q["question"] and q["reference"] and q["checks"], q["id"]
-        assert all(s.startswith(("carte:", "site:https://")) for s in q["expected_sources"]), q["id"]
+        assert all(s.startswith(("carte:", "site:/")) for s in q["expected_sources"]), q["id"]
         if q["category"] == "livraison":
             assert not q["expected_sources"]  # passent par l'outil, pas par la recherche
 

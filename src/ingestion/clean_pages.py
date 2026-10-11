@@ -23,6 +23,8 @@ from collections import Counter
 from pathlib import Path
 from urllib.parse import urlparse
 
+from src.config import BRAND_ALIASES
+
 ROOT = Path(__file__).resolve().parents[2]
 RAW_FILE = ROOT / "data" / "raw" / "pages.jsonl"
 CLEAN_FILE = ROOT / "data" / "processed" / "pages_clean.jsonl"
@@ -32,12 +34,15 @@ BOILERPLATE_MIN_SHARE = 0.10
 BOILERPLATE_MAX_LEN = 60
 MIN_TEXT_LEN = 50  # même seuil que le scraper
 
+# Nom du traiteur tel qu'il apparaît sur le site (variantes dans .env), le plus long d'abord
+BRAND = "|".join(re.escape(alias) for alias in sorted(BRAND_ALIASES, key=len, reverse=True))
+
 # Bruit d'interface PrestaShop qui n'apporte rien à un client
 UI_NOISE = re.compile(
     r"^(\d{1,3}|×|\(\d+\)|Ajouter au panier|Filtrer par|Filtres actifs.*|Réinitialiser les filtres"
     r"|Retour en haut|Affichage \d+-\d+ de \d+ article\(s\)|Je suis|une entreprise|un particulier"
-    r"|J'organise|Pour|Prix|Sucré salé.*|Salé|Sucré|[-*•]+|Traiteur démo|(Traiteur démo\s*)?vous recommande :?"
-    r"|.{1,40} Traiteur démo)$",
+    r"|J'organise|Pour|Prix|Sucré salé.*|Salé|Sucré|[-*•]+"
+    rf"|{BRAND}|(?:(?:{BRAND})\s*)?vous recommande :?|.{{1,40}} (?:{BRAND}))$",
     re.IGNORECASE,
 )
 
@@ -95,9 +100,9 @@ def clean_text(text: str, boilerplate: set[str]) -> str:
 
 
 def clean_title(title: str) -> str:
-    """'Plateau cocktail | Traiteur d&eacute;mo' -> 'Plateau cocktail' (le site écrit aussi "Traiteur démo")."""
+    """'Plateau cocktail | Nom &amp; Co' -> 'Plateau cocktail' (variantes du nom : BRAND_ALIASES)."""
     title = html.unescape(title)
-    title = re.sub(r"\s*[|-]?\s*Traiteur d[ée]mo\s*$", "", title, flags=re.IGNORECASE)
+    title = re.sub(rf"\s*[|-]?\s*(?:{BRAND})\s*$", "", title, flags=re.IGNORECASE)
     return title.strip() or "Accueil"
 
 

@@ -1,7 +1,10 @@
 """Tests du nettoyage des pages scrapées."""
 
+from urllib.parse import urlparse
+
 import pytest
 
+from src.config import BRAND_NAME
 from src.ingestion.clean_pages import (
     CLEAN_FILE,
     clean_pages,
@@ -15,7 +18,7 @@ MENU = "Mon panier\nCarte traiteur\nBuffet\n"
 
 
 def make_page(url: str, body: str) -> dict:
-    return {"url": url, "title": "Titre | Traiteur démo", "description": "", "text": MENU + body}
+    return {"url": url, "title": f"Titre | {BRAND_NAME}", "description": "", "text": MENU + body}
 
 
 def test_boilerplate_detecte_le_menu_repete():
@@ -47,11 +50,10 @@ def test_clean_text_retire_les_regles_contredites_par_la_carte():
 
 
 @pytest.mark.parametrize("raw, expected", [
-    ("Plateau cocktail  Traiteur démo", "Plateau cocktail"),
-    ("Traiteur végétarien | Traiteur d&eacute;mo", "Traiteur végétarien"),
-    ("Animation musicale | Traiteur démo", "Animation musicale"),
-    ("Buffet traiteur - Traiteur démo", "Buffet traiteur"),
-    ("Traiteur démo", "Accueil"),
+    (f"Plateau cocktail  {BRAND_NAME}", "Plateau cocktail"),
+    (f"Traiteur végétarien | {BRAND_NAME.replace('&', '&amp;')}", "Traiteur végétarien"),
+    (f"Buffet traiteur - {BRAND_NAME}", "Buffet traiteur"),
+    (BRAND_NAME, "Accueil"),
 ])
 def test_clean_title(raw, expected):
     assert clean_title(raw) == expected
@@ -71,7 +73,7 @@ def test_donnees_reelles_sans_bruit_et_pages_cles_presentes():
         assert "Mon panier" not in page["text"]
         assert "shopping_cart" not in page["text"]
         assert "avant 17h" not in page["text"], page["url"]  # la carte (16h) fait foi
-    urls = {p["url"].rstrip("/") for p in pages}
+    paths = {urlparse(p["url"]).path.rstrip("/") for p in pages}
     for path in ("/traiteur/livraison", "/buffet", "/cocktail", "/plateau-repas",
                  "/traiteur/vegetarien", "/traiteur/conditions-generales-de-vente"):
-        assert f"https://www.exemple-traiteur.fr{path}" in urls, path
+        assert path in paths, path

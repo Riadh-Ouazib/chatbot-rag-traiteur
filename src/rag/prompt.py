@@ -5,14 +5,11 @@ Le LLM ne sert pas de source de connaissance : il reformule les extraits numéro
 donne ("grounding"). Les numéros [n] qu'il cite sont ensuite traduits en sources par le code.
 """
 
-import os
-
 from langchain_core.documents import Document
 
-# Nom affiché par le bot. Modifiable (ex. BRAND_NAME="Traiteur démo") pour une démo publique
-# sans le nom du traiteur, qui n'a pas donné son accord pour être cité.
-BRAND_NAME = os.getenv("BRAND_NAME", "Traiteur démo")
-TEAM_CONTACT = "01 00 00 00 00 / contact@exemple-traiteur.fr"
+from src.config import BRAND_NAME, TEAM_EMAIL, TEAM_PHONE
+
+TEAM_CONTACT = f"{TEAM_PHONE} / {TEAM_EMAIL}"
 
 SYSTEM_PROMPT = f"""Tu es l'assistant du traiteur {BRAND_NAME} (Paris / Île-de-France).
 

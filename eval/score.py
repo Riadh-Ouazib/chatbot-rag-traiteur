@@ -20,6 +20,7 @@ import sys
 
 from common import QUESTIONS_FILE, RESULTS_DIR, answers_file, load_jsonl, source_key
 
+from src.config import TEAM_PHONE
 from src.ingestion.chunking import STRATEGIES
 from src.rag.chain import LLM_MODEL
 from src.rag.retriever import TOP_K, retrieve
@@ -31,7 +32,7 @@ JUDGE_NUM_CTX = 8192  # les prompts RAGAS contiennent les extraits + leurs propr
 RAGAS_METRICS = ("faithfulness", "answer_relevancy", "context_precision", "context_recall")
 SCORES_FILE = RESULTS_DIR / "scores.csv"
 SUMMARY_FILE = RESULTS_DIR / "summary.md"
-CONTACT = "01 00 00 00 00"
+CONTACT = TEAM_PHONE
 
 
 # ---------------------------------------------------------------- 1. recherche

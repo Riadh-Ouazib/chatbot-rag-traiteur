@@ -23,6 +23,7 @@ from pathlib import Path
 
 import holidays
 
+from src.config import SITE_URL
 from src.ingestion.postal_codes import normalize_name
 from src.rag.prompt import TEAM_CONTACT, WEEKDAYS
 
@@ -32,7 +33,7 @@ COMMUNES_FILE = ROOT / "data" / "processed" / "communes_idf.json"
 
 VAT_RATE = Decimal("0.10")  # 29,90 € HT -> 32,89 € TTC sur la grille
 LAST_MINUTE_MULTIPLIER = Decimal("2")
-GRID_SOURCE = "Carte Automne-Hiver 2026/2027, page PDF 31 et https://www.exemple-traiteur.fr/traiteur/livraison"
+GRID_SOURCE = f"Carte Automne-Hiver 2026/2027, page PDF 31 et {SITE_URL}/traiteur/livraison"
 
 # "Paris, La Défense" est en zone 1 ; La Défense n'est pas une commune dans la base La Poste
 PLACE_ALIASES = {"LA DEFENSE": ["92400", "92800"]}
@@ -136,7 +137,7 @@ def ask_team(reason: str) -> DeliveryQuote:
 
 def calculer_frais_livraison(lieu: str, date_livraison: str | None = None,
                              derniere_minute: bool = False) -> DeliveryQuote:
-    """Calcule les frais de livraison Traiteur démo pour un lieu d'Île-de-France.
+    """Calcule les frais de livraison du traiteur pour un lieu d'Île-de-France.
 
     Args:
         lieu: code postal (ex. "92100") ou nom de la ville (ex. "Boulogne-Billancourt", "Paris 15").
