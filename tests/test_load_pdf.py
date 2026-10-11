@@ -1,4 +1,4 @@
-"""Tests de l'extraction de la carte PDF (étape 2b).
+"""Tests de l'extraction de la carte PDF.
 
 Les allergènes de référence ont été relus dans la carte : si un test échoue,
 c'est que l'extraction a mélangé deux produits (risque pour la santé des clients).

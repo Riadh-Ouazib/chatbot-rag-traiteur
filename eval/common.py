@@ -1,5 +1,5 @@
 """
-common.py — Étape 6 : fonctions partagées par les scripts d'évaluation.
+common.py : Fonctions partagées par les scripts d'évaluation.
 """
 
 import json

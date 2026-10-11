@@ -1,4 +1,4 @@
-"""Tests de la lecture des dates de livraison (bug trouvé par l'évaluation de l'étape 6)."""
+"""Tests de la lecture des dates de livraison (bug trouvé par l'évaluation)."""
 
 from datetime import date
 

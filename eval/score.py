@@ -1,5 +1,5 @@
 """
-score.py — Étape 6b : noter les réponses du bot et comparer les deux stratégies de chunking.
+score.py : Noter les réponses du bot et comparer les deux stratégies de chunking.
 
 Trois niveaux de mesure :
   1. Recherche (sans LLM)   : la source attendue est-elle dans les extraits ? (hit rate@6, MRR)

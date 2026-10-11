@@ -1,5 +1,5 @@
 """
-clean_pages.py — Étape 2a : nettoyer les pages scrapées avant le chunking.
+clean_pages.py : Nettoyer les pages scrapées avant le chunking.
 
 Entrée  : data/raw/pages.jsonl          (sortie du scraper)
 Sortie  : data/processed/pages_clean.jsonl

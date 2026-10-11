@@ -1,5 +1,5 @@
 """
-delivery.py — Étape 4b : calcul des frais de livraison (Python pur, aucun LLM).
+delivery.py : Calcul des frais de livraison (Python pur, aucun LLM).
 
 Le LLM ne fait qu'appeler `calculer_frais_livraison` avec le lieu et la date extraits de la
 question (function calling). Le calcul, lui, est fait ici et testé dans tests/test_delivery.py.
@@ -10,7 +10,7 @@ Règles (carte Automne-Hiver 2026/2027, p. 31, qui fait foi) :
   - "dernière minute" (commande après 17h la veille ou avant 10h le jour même) +100 %.
 La grille ne dit pas si "dernière minute" et week-end se cumulent : on renvoie vers l'équipe.
 
-Données (générées par l'étape 4a) : data/processed/delivery_grid.json et communes_idf.json.
+Données (générées par src/ingestion/delivery_grid.py et postal_codes.py) : data/processed/delivery_grid.json et communes_idf.json.
 """
 
 import json

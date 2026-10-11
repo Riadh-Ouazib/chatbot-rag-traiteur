@@ -1,4 +1,4 @@
-"""Tests de l'outil de frais de livraison (étape 4).
+"""Tests de l'outil de frais de livraison.
 
 Les tests du calcul utilisent une petite grille fictive (fixture) : ils ne dépendent pas
 des données du traiteur, qui ne sont pas commitées.
@@ -105,7 +105,7 @@ def test_day_multiplier_nom_du_jour_ferie_en_francais():
     assert day_multiplier(date(2026, 12, 25)) == (Decimal("2"), "jour férié (Noël) : ×2")
 
 
-# ---------------------------------------------------------------- données (étape 4a)
+# ---------------------------------------------------------------- données
 @pytest.mark.parametrize("raw, expected", [
     ("Saint-Maur-des-Fossés", "ST MAUR DES FOSSES"),
     ("Paris 15ème", "PARIS 15"),

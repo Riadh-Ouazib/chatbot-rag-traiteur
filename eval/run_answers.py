@@ -1,7 +1,7 @@
 """
-run_answers.py — Étape 6a : faire répondre le bot aux questions d'évaluation.
+run_answers.py : Faire répondre le bot aux questions d'évaluation.
 
-Les réponses sont enregistrées une fois pour toutes (étape lente, ~5 min par stratégie) ;
+Les réponses sont enregistrées une fois pour toutes (lent, ~5 min par stratégie) ;
 score.py les note ensuite autant de fois que nécessaire.
 
 Lancement (depuis la racine du projet, Ollama démarré) :

@@ -1,4 +1,4 @@
-"""Tests des scripts d'évaluation (étape 6) : règles métier, moyennes, jeu de questions."""
+"""Tests des scripts d'évaluation : règles métier, moyennes, jeu de questions."""
 
 import math
 import sys

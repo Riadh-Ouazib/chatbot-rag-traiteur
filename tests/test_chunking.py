@@ -1,4 +1,4 @@
-"""Tests du découpage en chunks (étape 2c)."""
+"""Tests du découpage en chunks."""
 
 import pytest
 

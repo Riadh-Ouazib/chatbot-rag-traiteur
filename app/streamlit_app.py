@@ -1,5 +1,5 @@
 """
-streamlit_app.py — Étape 5 : interface de chat du bot.
+streamlit_app.py : Interface de chat du bot.
 
 Lancement (depuis la racine du projet, Ollama démarré) :
     streamlit run app/streamlit_app.py
@@ -79,7 +79,7 @@ def sidebar() -> str:
         strategy = st.radio("Découpage des documents (chunking)", STRATEGIES,
                             index=STRATEGIES.index(chain.DEFAULT_STRATEGY),
                             help="'structure' : un chunk par produit / section. "
-                                 "'recursive' : morceaux de taille fixe. Comparés à l'étape 6.")
+                                 "'recursive' : morceaux de taille fixe. Comparés dans eval/.")
         if st.button("🗑️ Nouvelle conversation", use_container_width=True):
             st.session_state.messages = []
         st.divider()

@@ -1,5 +1,5 @@
 """
-delivery_grid.py — Étape 4a : extraire la grille des frais de livraison de la page "livraison".
+delivery_grid.py : Extraire la grille des frais de livraison de la page "livraison".
 
 Entrée  : data/processed/pages_clean.jsonl   (page /traiteur/livraison)
 Sortie  : data/processed/delivery_grid.json

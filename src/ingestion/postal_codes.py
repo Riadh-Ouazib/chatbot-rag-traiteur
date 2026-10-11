@@ -1,5 +1,5 @@
 """
-postal_codes.py — Étape 4a : base des communes d'Île-de-France et de leurs codes postaux.
+postal_codes.py : Base des communes d'Île-de-France et de leurs codes postaux.
 
 Source : base officielle des codes postaux de La Poste (open data, data.gouv.fr).
 Sortie : data/processed/communes_idf.json   {"BOULOGNE BILLANCOURT": ["92100"], ...}

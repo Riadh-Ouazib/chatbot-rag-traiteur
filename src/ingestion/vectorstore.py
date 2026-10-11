@@ -1,7 +1,7 @@
 """
-vectorstore.py — Modèle d'embeddings et accès à la base vectorielle ChromaDB.
+vectorstore.py : Modèle d'embeddings et accès à la base vectorielle ChromaDB.
 
-Partagé entre l'indexation (étape 2) et la recherche (étape 3) : les questions doivent être
+Partagé entre l'indexation et la recherche : les questions doivent être
 encodées par le même modèle, avec les mêmes réglages, que les documents.
 """
 

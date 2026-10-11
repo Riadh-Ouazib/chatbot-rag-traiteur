@@ -1,5 +1,5 @@
 """
-prompt.py — Étape 3b : les règles du bot et la mise en forme du contexte envoyé au LLM.
+prompt.py : Les règles du bot et la mise en forme du contexte envoyé au LLM.
 
 Le LLM ne sert pas de source de connaissance : il reformule les extraits numérotés qu'on lui
 donne ("grounding"). Les numéros [n] qu'il cite sont ensuite traduits en sources par le code.

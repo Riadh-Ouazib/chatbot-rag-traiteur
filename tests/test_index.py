@@ -1,4 +1,4 @@
-"""Tests de recherche dans l'index Chroma (étape 2d).
+"""Tests de recherche dans l'index Chroma.
 
 Ils chargent le modèle d'embeddings (~10 s) et nécessitent d'avoir lancé build_index.
 """

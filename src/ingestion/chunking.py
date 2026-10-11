@@ -1,7 +1,7 @@
 """
-chunking.py — Étape 2c : découper pages et carte en chunks, avec leurs métadonnées.
+chunking.py : Découper pages et carte en chunks, avec leurs métadonnées.
 
-Deux stratégies, comparées à l'étape 6 (RAGAS) :
+Deux stratégies, comparées dans eval/ (RAGAS) :
   - "recursive" : découpage générique tous les ~800 caractères (paragraphes, puis phrases).
                   La carte est traitée page par page, comme un simple texte.
   - "structure" : on suit la structure du contenu.

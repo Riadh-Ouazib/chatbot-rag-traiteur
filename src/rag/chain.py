@@ -1,5 +1,5 @@
 """
-chain.py — Étape 3c : la chaîne RAG complète, question -> réponse citée.
+chain.py : La chaîne RAG complète, question -> réponse citée.
 
     question -> retrieve (Chroma) -> prompt (règles + extraits numérotés) -> LLM (Ollama)
              -> le code traduit les [n] cités en sources (URL ou page du PDF)
@@ -7,11 +7,11 @@ chain.py — Étape 3c : la chaîne RAG complète, question -> réponse citée.
 Le LLM n'écrit jamais d'URL lui-même : il ne cite que des numéros, et c'est le code qui
 retrouve la source dans les métadonnées. Un numéro inexistant est retiré de la réponse.
 
-Étape 4 — une question de frais de livraison suit un autre chemin (routage) :
+Frais de livraison : une question de frais de livraison suit un autre chemin (routage) :
     question -> LLM + outil -> calculer_frais_livraison(lieu, date) exécuté par le code
              -> LLM rédige la réponse -> le code ajoute le détail exact du calcul
 
-Étape 5 — conversation : une question de suivi ("Et samedi ?") est d'abord reformulée en
+Conversation : une question de suivi ("Et samedi ?") est d'abord reformulée en
 question complète à partir des derniers échanges, puis suit le chemin normal.
 Les informations ajoutées par le code (allergènes, avertissement, calcul) sont des
 "encadrés" séparés du texte du LLM, pour que l'interface les distingue.

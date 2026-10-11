@@ -1,5 +1,5 @@
 """
-load_pdf.py — Étape 2b : extraire la carte PDF produit par produit.
+load_pdf.py : Extraire la carte PDF produit par produit.
 
 Entrée  : data/raw/Carte_*.pdf          (téléchargée à la main, jamais par script)
 Sortie  : data/processed/carte.jsonl     (1 ligne = 1 produit ou 1 bloc de texte libre)

@@ -1,4 +1,4 @@
-"""Tests de l'interface Streamlit (étape 5), sans navigateur ni LLM.
+"""Tests de l'interface Streamlit, sans navigateur ni LLM.
 
 AppTest exécute le script comme Streamlit le ferait ; la chaîne RAG est remplacée par une
 fausse réponse pour que les tests soient rapides et ne dépendent pas d'Ollama.

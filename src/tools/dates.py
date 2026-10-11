@@ -1,7 +1,7 @@
 """
-dates.py — Lire la date de livraison écrite par le client ("samedi", "14 novembre 2026", "17/11").
+dates.py : Lire la date de livraison écrite par le client ("samedi", "14 novembre 2026", "17/11").
 
-C'est le code, pas le LLM, qui lit la date. L'évaluation (étape 6) a montré que le petit
+C'est le code, pas le LLM, qui lit la date. L'évaluation a montré que le petit
 modèle recopiait une date fausse du calendrier quand la date demandée n'y figurait pas
 ("mardi 17 novembre" -> "samedi 17 octobre"), ce qui faussait le prix.
 """

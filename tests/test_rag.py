@@ -1,4 +1,4 @@
-"""Tests de la chaîne RAG (étape 3).
+"""Tests de la chaîne RAG.
 
 Les tests unitaires n'appellent pas le LLM. Les tests "bout en bout" sont sautés si Ollama
 ou l'index Chroma ne sont pas disponibles (~5-15 s par question sur un GPU de portable).
@@ -120,7 +120,7 @@ def test_allergenes_macarons_liste_complete(ask):
     assert any("p. 24" in citation for _, citation in result.sources)
 
 
-# ---------------------------------------------------------------- étape 4 : routage et outil
+# ---------------------------------------------------------------- routage et outil
 @pytest.mark.parametrize("question, expected", [
     ("Combien coûte la livraison à Boulogne ?", True),
     ("Quel est le tarif pour livrer au 75015 samedi ?", True),
@@ -158,7 +158,7 @@ def test_question_de_regle_de_livraison_sans_outil(ask):
     assert not result.quotes and result.sources
 
 
-# ---------------------------------------------------------------- étape 5 : questions de suivi
+# ---------------------------------------------------------------- questions de suivi
 @llm
 def test_question_de_suivi_reformulee_puis_calculee_par_l_outil(ask):
     first = ask("Combien coûte la livraison au 92100 ?")

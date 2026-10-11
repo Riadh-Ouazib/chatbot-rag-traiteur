@@ -1,5 +1,5 @@
 """
-scrape_site.py — Étape 1 du projet RAG : collecter le contenu public du site Traiteur démo.
+scrape_site.py : Collecter le contenu public du site Traiteur démo.
 
 Ce que fait le script :
   1. Lit robots.txt et ne visite QUE les pages autorisées.

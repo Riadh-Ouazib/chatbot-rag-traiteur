@@ -1,11 +1,11 @@
-# --- Scraping (étape 1)
+# --- Scraping
 requests>=2.31
 beautifulsoup4>=4.12
 lxml>=5.0
 trafilatura>=1.8
 protego>=0.3
 
-# --- Ingestion : PDF, chunking, indexation (étape 2)
+# --- Ingestion : PDF, chunking, indexation
 pymupdf>=1.24          # lit la position et la police de chaque ligne du PDF
 langchain>=0.3
 # 0.4.2 a supprimé chat_models.vertexai, encore importé par ragas 0.4.3
@@ -16,15 +16,15 @@ langchain-huggingface>=0.1
 chromadb>=0.5
 sentence-transformers>=3.0
 
-# --- LLM (étape 3-4) : modèle local via Ollama (qwen3:4b-instruct-2507)
+# --- LLM : modèle local via Ollama (qwen3:4b-instruct-2507)
 langchain-ollama>=1.0
 holidays>=0.50          # jours fériés français (majoration des frais de livraison)
 python-dotenv>=1.0
 
-# --- Interface (étape 5)
+# --- Interface
 streamlit>=1.38
 
-# --- Évaluation (étape 6)
+# --- Évaluation
 ragas>=0.2
 
 # --- Tests

@@ -1,163 +1,125 @@
-# Chatbot RAG pour un traiteur parisien
+# Chatbot RAG pour un traiteur
 
-Assistant conversationnel qui répond aux questions des clients d'un traiteur (Paris / Île-de-France)
-à partir du **contenu public de son site** et de **sa carte PDF** : produits, allergènes, délais de
-commande, conditions de vente, frais de livraison.
+Un chatbot qui répond aux questions des clients d'un traiteur parisien (produits, allergènes,
+délais de commande, CGV, frais de livraison) à partir du contenu de son site et de sa carte PDF.
 
-Projet portfolio, 100 % local : LLM via **Ollama** (qwen3 4B) sur un GPU de portable (RTX 3050, 4 Go).
+Tout tourne en local : le LLM est qwen3 4B via Ollama, sur mon PC portable (RTX 3050 4 Go).
 
 ![Démo](docs/demo.gif)
 
-> Prototype non officiel, non affilié au traiteur. Le nom du traiteur est configurable
-> (`BRAND_NAME`) et masqué dans la démo.
+Projet perso, non affilié au traiteur. Le nom affiché par le bot se change avec la variable
+`BRAND_NAME`.
 
-## Points forts
+## Ce que fait le bot
 
-- **Réponses sourcées** : chaque phrase cite un extrait `[n]`, traduit par le code en lien vers la
-  page du site ou en numéro de page de la carte. Un numéro inventé par le LLM est supprimé.
-- **Allergènes jamais inventés** : la liste officielle du produit est recopiée par le code (pas par
-  le LLM), avec l'avertissement sur les contaminations croisées ; sinon, renvoi vers l'équipe.
-- **Frais de livraison calculés par un outil Python** (*function calling*) : zone par code postal ou
-  ville, majorations samedi / dimanche / jours fériés / dernière minute, TVA, arrondis en `Decimal`.
-  Le LLM choisit l'outil ; il ne fait aucun calcul.
-- **Pas d'hallucination** : si la réponse n'est pas dans les extraits, le bot le dit.
-- **Mémoire de conversation** : « Et le samedi ? » est reformulé en question complète.
-- **Évaluation** sur 30 questions : recherche, RAGAS et règles métier, pour comparer deux
-  stratégies de découpage des documents.
+- Il répond uniquement à partir des extraits retrouvés, et cite ses sources (lien de la page ou
+  page de la carte). Le LLM cite des numéros d'extraits, et c'est le code qui retrouve la source,
+  comme ça il ne peut pas inventer d'URL.
+- Pour les allergènes, c'est le code qui recopie la liste de la carte, pas le LLM. Si le produit
+  n'est pas trouvé, le bot renvoie vers le traiteur.
+- Les frais de livraison sont calculés par une fonction Python appelée par le LLM (function calling) :
+  zone selon le code postal ou la ville, majoration samedi / dimanche / jour férié / dernière minute,
+  TVA. Au début je laissais le LLM calculer avec la grille dans le contexte, il se trompait souvent
+  de zone et de TVA.
+- Il garde le fil de la conversation : "Et le samedi ?" est reformulé en question complète avant
+  la recherche.
 
 ## Architecture
 
 ```mermaid
 flowchart LR
-    subgraph Ingestion["Préparation des données (une fois)"]
-        A[Site web<br/>scraping poli<br/>robots.txt, 2 s] --> C[Nettoyage]
-        B[Carte PDF<br/>téléchargée à la main] --> D[Extraction<br/>produits + allergènes]
-        C --> E[Chunking<br/>recursive / structure]
-        D --> E
-        E --> F[(ChromaDB<br/>embeddings e5 multilingues)]
-        G[Page livraison +<br/>codes postaux La Poste] --> H[(Grille de<br/>livraison JSON)]
-    end
+    A[Site web] --> C[Nettoyage]
+    B[Carte PDF] --> D[Extraction produits]
+    C --> E[Chunking]
+    D --> E
+    E --> F[(ChromaDB)]
+    G[Grille livraison + codes postaux] --> H[(JSON)]
 
-    subgraph Question["À chaque question"]
-        Q[Question] --> R{Reformulation<br/>si question de suivi}
-        R --> S{Frais de<br/>livraison ?}
-        S -- non --> T[Recherche<br/>top 6 extraits] --> U[LLM qwen3 4B<br/>répond en citant n]
-        S -- oui --> V[LLM choisit l'outil] --> W[calculer_frais_livraison<br/>Python pur]
-        U --> X[Code : sources, liste<br/>officielle d'allergènes]
-        W --> X
-        X --> Y[Streamlit]
-    end
-
+    Q[Question] --> R[Reformulation si suivi]
+    R --> S{Frais de livraison ?}
+    S -- non --> T[Recherche top 6] --> U[LLM]
+    S -- oui --> V[LLM + outil] --> W[calculer_frais_livraison]
     F -.-> T
     H -.-> W
+    U --> Y[Streamlit]
+    W --> Y
 ```
 
-Principe directeur : **ce qui est critique vient du code**, le LLM ne fait que reformuler.
+## Évaluation
 
-## Résultats de l'évaluation
+J'ai écrit 30 questions de test (délais, allergènes, produits, CGV, livraison et quelques questions
+pièges) et comparé deux façons de découper les documents :
+- `recursive` : morceaux de taille fixe
+- `structure` : un morceau par produit de la carte / par section des pages
 
-30 questions rédigées à la main (délais, allergènes, produits, conditions de vente, livraison,
-questions pièges), comparaison de deux stratégies de découpage :
-- `recursive` : morceaux de taille fixe ;
-- `structure` : un morceau par produit de la carte / par section du site.
-
-| Mesure | recursive | structure |
+| | recursive | structure |
 |---|---|---|
-| Recherche : hit rate@6 | 82 % | **91 %** |
-| Recherche : MRR | 0,62 | **0,71** |
-| RAGAS : faithfulness | 0,66 | **0,71** |
-| RAGAS : answer_relevancy | 0,63 | 0,64 |
-| RAGAS : context_precision | 0,47 | 0,41 |
-| RAGAS : context_recall | 0,61 | **0,73** |
-| Règles métier respectées | 73 % | **93 %** |
-| Temps de réponse moyen | 10,1 s | **7,6 s** |
+| Hit rate@6 | 82 % | 91 % |
+| MRR | 0,62 | 0,71 |
+| RAGAS faithfulness | 0,66 | 0,71 |
+| RAGAS answer_relevancy | 0,63 | 0,64 |
+| RAGAS context_precision | 0,47 | 0,41 |
+| RAGAS context_recall | 0,61 | 0,73 |
+| Règles métier OK | 73 % | 93 % |
+| Temps moyen | 10,1 s | 7,6 s |
 
-**`structure` est retenue** : un produit = un morceau, donc sa liste d'allergènes reste entière
-et peut être recopiée par le code.
+J'ai gardé `structure`. Avec `recursive`, la liste des allergènes d'un produit peut être coupée
+en deux morceaux.
 
-Limites de la mesure, assumées :
-- le juge RAGAS est le même petit modèle que le bot (pas de GPU plus gros ni d'API payante) ;
-  `context_precision` n'a pu être calculée que sur 4 à 6 questions (réponses du juge mal formées) ;
-- `answer_relevancy` vaut 0 quand le bot refuse de répondre à une question piège, alors que c'est
-  le comportement voulu ;
-- les **règles métier**, vérifiées par du code (montant exact, contact affiché, liste officielle,
-  absence de prix inventé...), sont la mesure la plus fiable.
+À prendre avec du recul : le juge RAGAS est le même modèle 4B que le bot (pas de GPU plus gros),
+et il renvoie souvent des réponses mal formées. Du coup `context_precision` n'est calculée que sur
+quelques questions. `answer_relevancy` met aussi 0 quand le bot refuse de répondre à une question
+piège, alors que c'est ce qu'on veut. Les "règles métier" sont des vérifications en Python (bon
+montant, contact affiché, pas de prix inventé...), c'est la mesure à laquelle je fais le plus
+confiance.
 
-Détail par question : [`eval/results/summary.md`](eval/results/summary.md).
+Détail par question : `eval/results/summary.md`.
 
-## Installation
+## Lancer le projet
 
-Prérequis : Python 3.11+, [Ollama](https://ollama.com).
+Il faut Python 3.11+ et [Ollama](https://ollama.com).
 
 ```bash
 python -m venv .venv
-.venv\Scripts\activate            # Windows (Linux/macOS : source .venv/bin/activate)
+.venv\Scripts\activate
 pip install -r requirements.txt
 ollama pull qwen3:4b-instruct-2507-q4_K_M
 ```
 
-### Préparer les données
-
-La carte PDF se télécharge **à la main** (le dossier `/upload/` du site est interdit aux robots)
-et se dépose dans `data/raw/`. Les données du traiteur ne sont pas versionnées.
+Les données du traiteur ne sont pas dans le repo. La carte PDF est à télécharger à la main dans
+`data/raw/` (le dossier `/upload/` du site est interdit aux robots dans son robots.txt), puis :
 
 ```bash
-python src/scraping/scrape_site.py          # scraping du site
-python -m src.ingestion.clean_pages          # nettoyage des pages
-python -m src.ingestion.load_pdf             # extraction de la carte
-python -m src.ingestion.build_index          # chunking + index Chroma (2 stratégies)
-python -m src.ingestion.delivery_grid        # grille de livraison
-python -m src.ingestion.postal_codes         # communes d'Île-de-France (open data La Poste)
+python src/scraping/scrape_site.py
+python -m src.ingestion.clean_pages
+python -m src.ingestion.load_pdf
+python -m src.ingestion.build_index
+python -m src.ingestion.delivery_grid
+python -m src.ingestion.postal_codes
 ```
 
-### Lancer
+Ensuite :
 
 ```bash
-streamlit run app/streamlit_app.py                               # interface web
-python -m src.rag.chain "Livrez-vous le dimanche ?"              # ou dans le terminal
+streamlit run app/streamlit_app.py
 ```
 
-Démo sans le nom du traiteur : `set BRAND_NAME=Traiteur démo` (PowerShell :
-`$env:BRAND_NAME="Traiteur démo"`) avant de lancer.
-
-### Tests et évaluation
+Tests et évaluation :
 
 ```bash
-python -m pytest                   # ~120 tests (ceux qui appellent le LLM sont sautés sans Ollama)
-python eval/run_answers.py         # réponses aux 30 questions, pour les 2 stratégies
-python eval/score.py --no-ragas    # notation rapide (recherche + règles métier)
-python eval/score.py               # notation complète avec RAGAS (plusieurs heures en local)
+python -m pytest
+python eval/run_answers.py
+python eval/score.py            # ajouter --no-ragas pour aller vite (RAGAS prend plusieurs heures en local)
 ```
 
 ## Stack
 
-| Rôle | Outils |
-|---|---|
-| Scraping | requests, BeautifulSoup, trafilatura, protego (robots.txt) |
-| PDF | PyMuPDF (position et police de chaque ligne) |
-| RAG | LangChain, ChromaDB, sentence-transformers (`multilingual-e5`) |
-| LLM | Ollama, `qwen3:4b-instruct-2507` (quantifié 4 bits), function calling |
-| Outil livraison | Python pur, `Decimal`, `holidays`, open data La Poste |
-| Interface | Streamlit |
-| Évaluation | RAGAS, pandas |
-| Tests | pytest, `streamlit.testing` |
+Python, requests / BeautifulSoup / trafilatura, PyMuPDF, LangChain, ChromaDB,
+sentence-transformers (multilingual-e5), Ollama, Streamlit, RAGAS, pytest.
 
-## Structure
+## Pistes
 
-```
-src/scraping/      scraping du site
-src/ingestion/     nettoyage, extraction PDF, chunking, index Chroma, grille de livraison
-src/rag/           recherche, prompts, chaîne RAG (citations, encadrés, routage)
-src/tools/         outil de frais de livraison, lecture des dates
-app/               interface Streamlit
-eval/              30 questions, génération des réponses, notation
-tests/             tests pytest
-docs/CONCEPTS.md   explication détaillée de tous les concepts du projet
-```
-
-## Pistes d'amélioration
-
-- Un juge RAGAS plus fort (modèle plus gros ou API) pour des scores plus fiables.
-- Un *re-ranker* (cross-encoder) pour mieux classer les extraits avant le LLM.
-- Un modèle plus gros : certaines erreurs restantes viennent du 4B (extrait trouvé mais mal lu).
-- Résoudre les contradictions entre le site et la carte à la source (la carte fait foi ici).
+- Un meilleur juge pour RAGAS (modèle plus gros ou API).
+- Ajouter un re-ranker avant le LLM.
+- Tester un modèle plus gros : certaines erreurs viennent du 4B qui a le bon extrait mais répond
+  quand même qu'il ne trouve pas.

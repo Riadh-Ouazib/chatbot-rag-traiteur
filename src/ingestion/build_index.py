@@ -1,5 +1,5 @@
 """
-build_index.py — Étape 2d : calculer les embeddings des chunks et les indexer dans ChromaDB.
+build_index.py : Calculer les embeddings des chunks et les indexer dans ChromaDB.
 
 Lancement (depuis la racine du projet), après clean_pages et load_pdf :
     python -m src.ingestion.build_index                 # les deux stratégies

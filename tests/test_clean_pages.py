@@ -1,4 +1,4 @@
-"""Tests du nettoyage des pages scrapées (étape 2a)."""
+"""Tests du nettoyage des pages scrapées."""
 
 import pytest
 
