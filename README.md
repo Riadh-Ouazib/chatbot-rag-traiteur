@@ -56,24 +56,31 @@ pièges) et comparé deux façons de découper les documents :
 |---|---|---|
 | Hit rate@6 | 82 % | 91 % |
 | MRR | 0,62 | 0,71 |
-| RAGAS faithfulness | 0,66 | 0,71 |
-| RAGAS answer_relevancy | 0,63 | 0,64 |
-| RAGAS context_precision | 0,47 | 0,41 |
-| RAGAS context_recall | 0,61 | 0,73 |
+| RAGAS faithfulness | 0,76 | 0,74 |
+| RAGAS answer_relevancy | 0,72 | 0,72 |
+| RAGAS context_precision | 0,60 | 0,60 |
+| RAGAS context_recall | 0,50 | 0,52 |
 | Règles métier OK | 73 % | 93 % |
 | Temps moyen | 10,1 s | 7,6 s |
 
-J'ai gardé `structure`. Avec `recursive`, la liste des allergènes d'un produit peut être coupée
-en deux morceaux.
+J'ai gardé `structure` : la recherche trouve plus souvent la bonne source, et surtout les règles
+métier passent de 73 % à 93 %. Avec `recursive`, la liste des allergènes d'un produit peut être
+coupée en deux morceaux, et le code ne peut plus la recopier.
 
-À prendre avec du recul : le juge RAGAS est le même modèle 4B que le bot (pas de GPU plus gros),
-et il renvoie souvent des réponses mal formées. Du coup `context_precision` n'est calculée que sur
-quelques questions. `answer_relevancy` met aussi 0 quand le bot refuse de répondre à une question
-piège, alors que c'est ce qu'on veut. Les "règles métier" sont des vérifications en Python (bon
-montant, contact affiché, pas de prix inventé...), c'est la mesure à laquelle je fais le plus
-confiance.
+Pour le juge RAGAS, j'ai d'abord utilisé le même modèle 4B que le bot, en local (4 Go de VRAM,
+pas de GPU plus gros). Problème : un modèle qui se note lui-même est biaisé, et ce petit juge
+renvoyait souvent des réponses mal formées (`context_precision` calculée sur seulement 4 à 6
+questions sur 30). Je suis donc passé à un juge beaucoup plus gros et d'une autre famille,
+Nemotron 3 Super 120B, via l'API gratuite de NVIDIA NIM (`python eval/score.py --judge nim`).
+Toutes les métriques sont maintenant calculées.
 
-Détail par question : `eval/results/summary.md`.
+Ce que ça montre : avec un vrai juge, RAGAS ne voit presque pas de différence entre les deux
+stratégies, alors que le juge 4B donnait l'avantage à `structure`. La différence est réelle, mais
+elle se voit sur la recherche et les règles métier, pas sur la qualité du texte. À noter aussi :
+`answer_relevancy` met 0 quand le bot refuse une question piège, alors que c'est ce qu'on veut, et
+les 4 questions de frais de livraison ne passent pas par RAGAS (l'outil répond sans extraits).
+
+Détail par question : `eval/results/summary.md` (ancien juge local : `summary_juge_local.md`).
 
 ## Lancer le projet
 
@@ -111,7 +118,8 @@ Tests et évaluation :
 ```bash
 python -m pytest
 python eval/run_answers.py
-python eval/score.py            # ajouter --no-ragas pour aller vite (RAGAS prend plusieurs heures en local)
+python eval/score.py --judge nim  # juge NVIDIA NIM (clé dans .env), ~15 min
+python eval/score.py --no-ragas   # sans RAGAS, quelques secondes
 ```
 
 ## Stack
@@ -121,7 +129,6 @@ sentence-transformers (multilingual-e5), Ollama, Streamlit, RAGAS, pytest.
 
 ## Pistes
 
-- Un meilleur juge pour RAGAS (modèle plus gros ou API).
 - Ajouter un re-ranker avant le LLM.
 - Tester un modèle plus gros : certaines erreurs viennent du 4B qui a le bon extrait mais répond
   quand même qu'il ne trouve pas.

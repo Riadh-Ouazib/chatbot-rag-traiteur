@@ -10,12 +10,14 @@ Entrées : eval/questions.jsonl et eval/results/answers_<stratégie>.jsonl (run_
 Sorties : eval/results/scores.csv (détail par question) et eval/results/summary.md (tableau)
 
 Lancement (depuis la racine du projet) :
-    python eval/score.py              # tout, RAGAS compris (long : LLM local)
+    python eval/score.py              # tout, RAGAS avec le juge local (plusieurs heures)
+    python eval/score.py --judge nim  # RAGAS avec un gros modèle via NVIDIA NIM (clé dans .env)
     python eval/score.py --no-ragas   # recherche + règles seulement (quelques secondes)
 """
 
 import csv
 import math
+import os
 import sys
 
 from common import QUESTIONS_FILE, RESULTS_DIR, answers_file, load_jsonl, source_key
@@ -25,10 +27,15 @@ from src.ingestion.chunking import STRATEGIES
 from src.rag.chain import LLM_MODEL
 from src.rag.retriever import TOP_K, retrieve
 
-# Juge RAGAS : option C retenue (même modèle que le bot, local). Biaisé et peu fiable :
-# à remplacer par un modèle plus fort pour des chiffres publiables.
-JUDGE_MODEL = LLM_MODEL
+# Juges RAGAS. "local" : le même modèle que le bot (biaisé, il se note lui-même).
+# "nim" : un modèle bien plus gros et d'une autre famille, via l'API gratuite de NVIDIA.
+JUDGES = {
+    "local": (LLM_MODEL, "même modèle que le bot, en local"),
+    "nim": ("nvidia/nemotron-3-super-120b-a12b", "Nemotron 3 Super 120B via NVIDIA NIM, autre famille que le bot"),
+}
 JUDGE_NUM_CTX = 8192  # les prompts RAGAS contiennent les extraits + leurs propres consignes
+NIM_URL = "https://integrate.api.nvidia.com/v1"
+NIM_WORKERS = 4  # appels en parallèle : l'offre gratuite accepte 40 requêtes / minute
 RAGAS_METRICS = ("faithfulness", "answer_relevancy", "context_precision", "context_recall")
 SCORES_FILE = RESULTS_DIR / "scores.csv"
 SUMMARY_FILE = RESULTS_DIR / "summary.md"
@@ -65,9 +72,19 @@ def check_rules(checks: dict, record: dict) -> dict[str, bool]:
 
 
 # ---------------------------------------------------------------- 2. RAGAS
-def ragas_scores(questions: dict[str, dict], records: list[dict]) -> dict[str, dict]:
-    """Scores RAGAS par question (questions passées par le RAG, avec extraits et référence)."""
+def judge_llm(judge: str):
+    """Modèle LangChain du juge : Ollama en local, ou l'API NVIDIA NIM (compatible OpenAI)."""
+    model = JUDGES[judge][0]
+    if judge == "nim":
+        from langchain_openai import ChatOpenAI
+        return ChatOpenAI(model=model, base_url=NIM_URL, api_key=os.environ["NVIDIA_API_KEY"],
+                          temperature=0, timeout=300)
     from langchain_ollama import ChatOllama
+    return ChatOllama(model=model, temperature=0, num_ctx=JUDGE_NUM_CTX)
+
+
+def ragas_scores(questions: dict[str, dict], records: list[dict], judge: str) -> dict[str, dict]:
+    """Scores RAGAS par question (questions passées par le RAG, avec extraits et référence)."""
     from ragas import EvaluationDataset, RunConfig, SingleTurnSample, evaluate
     from ragas.embeddings import LangchainEmbeddingsWrapper
     from ragas.llms import LangchainLLMWrapper
@@ -84,11 +101,10 @@ def ragas_scores(questions: dict[str, dict], records: list[dict]) -> dict[str, d
     samples = [SingleTurnSample(user_input=r["question"], response=r["response"],
                                 retrieved_contexts=r["contexts"],
                                 reference=questions[r["id"]]["reference"]) for r in evaluated]
-    judge = LangchainLLMWrapper(ChatOllama(model=JUDGE_MODEL, temperature=0, num_ctx=JUDGE_NUM_CTX))
     metrics = [Faithfulness(), ResponseRelevancy(), LLMContextPrecisionWithReference(), LLMContextRecall()]
-    result = evaluate(EvaluationDataset(samples=samples), metrics=metrics, llm=judge,
+    result = evaluate(EvaluationDataset(samples=samples), metrics=metrics, llm=LangchainLLMWrapper(judge_llm(judge)),
                       embeddings=LangchainEmbeddingsWrapper(get_embeddings()),
-                      run_config=RunConfig(max_workers=1, timeout=600))
+                      run_config=RunConfig(max_workers=NIM_WORKERS if judge == "nim" else 1, timeout=600))
     rows = result.to_pandas().to_dict("records")
     names = dict(zip(RAGAS_METRICS, ("faithfulness", "answer_relevancy",
                                      "llm_context_precision_with_reference", "context_recall")))
@@ -96,10 +112,10 @@ def ragas_scores(questions: dict[str, dict], records: list[dict]) -> dict[str, d
 
 
 # ---------------------------------------------------------------- assemblage
-def score_strategy(questions: dict[str, dict], strategy: str, with_ragas: bool) -> list[dict]:
-    """Une ligne par question : recherche, règles, RAGAS, temps de réponse."""
+def score_strategy(questions: dict[str, dict], strategy: str, judge: str | None) -> list[dict]:
+    """Une ligne par question : recherche, règles, RAGAS (si un juge est donné), temps de réponse."""
     records = load_jsonl(answers_file(strategy))
-    ragas = ragas_scores(questions, records) if with_ragas else {}
+    ragas = ragas_scores(questions, records, judge) if judge else {}
     rows = []
     for record in records:
         item = questions[record["id"]]
@@ -144,7 +160,7 @@ def summary_table(rows: list[dict], strategies: list[str]) -> str:
     return "\n".join(lines)
 
 
-def write_outputs(rows: list[dict], strategies: list[str], with_ragas: bool) -> None:
+def write_outputs(rows: list[dict], strategies: list[str], judge: str | None) -> None:
     """scores.csv (détail) et summary.md (tableau + échecs)."""
     columns = ["strategy", "id", "category", "hit", "rank", "rr", *RAGAS_METRICS,
                "rules_ok", "rules_failed", "elapsed"]
@@ -154,20 +170,21 @@ def write_outputs(rows: list[dict], strategies: list[str], with_ragas: bool) -> 
         writer.writerows(rows)
     failures = [f"- `{r['strategy']}` **{r['id']}** : {r['rules_failed']}" for r in rows if r["rules_failed"]]
     misses = [f"- `{r['strategy']}` **{r['id']}**" for r in rows if r.get("hit") == 0]
-    judge = f"juge RAGAS : `{JUDGE_MODEL}` (même modèle que le bot)" if with_ragas else "RAGAS non calculé"
+    judge_text = f"juge RAGAS : `{JUDGES[judge][0]}` ({JUDGES[judge][1]})" if judge else "RAGAS non calculé"
     text = (f"# Résultats de l'évaluation\n\n{len(rows) // len(strategies)} questions, "
-            f"bot `{LLM_MODEL}`, {judge}.\n\n{summary_table(rows, strategies)}\n\n"
+            f"bot `{LLM_MODEL}`, {judge_text}.\n\n{summary_table(rows, strategies)}\n\n"
             f"## Règles métier non respectées\n\n" + ("\n".join(failures) or "Aucune.") +
             "\n\n## Source attendue absente des extraits\n\n" + ("\n".join(misses) or "Aucune.") + "\n")
     SUMMARY_FILE.write_text(text, encoding="utf-8")
 
 
 def main() -> None:
-    with_ragas = "--no-ragas" not in sys.argv
+    judge = None if "--no-ragas" in sys.argv else (sys.argv[sys.argv.index("--judge") + 1]
+                                                     if "--judge" in sys.argv else "local")
     questions = {q["id"]: q for q in load_jsonl(QUESTIONS_FILE)}
     strategies = [s for s in STRATEGIES if answers_file(s).exists()]
-    rows = [row for s in strategies for row in score_strategy(questions, s, with_ragas)]
-    write_outputs(rows, strategies, with_ragas)
+    rows = [row for s in strategies for row in score_strategy(questions, s, judge)]
+    write_outputs(rows, strategies, judge)
     print(SUMMARY_FILE.read_text(encoding="utf-8"))
 
 

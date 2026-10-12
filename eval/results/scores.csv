@@ -1,61 +1,61 @@
 strategy,id,category,hit,rank,rr,faithfulness,answer_relevancy,context_precision,context_recall,rules_ok,rules_failed,elapsed
-recursive,delai-01,délais,1,2,0.5,0.5,0.8613729550515163,nan,1.0,1,,35.22
-recursive,delai-02,délais,1,1,1.0,0.5,0.8758192342190195,nan,1.0,1,,7.26
-recursive,delai-03,délais,1,1,1.0,1.0,0.8806815985985531,0.99999999995,1.0,1,,6.32
-recursive,delai-04,délais,0,0,0.0,0.6666666666666666,0.8412114378461752,nan,0.0,1,,6.3
-recursive,delai-05,délais,1,6,0.16666666666666666,0.5,0.8878610149607923,0.16666666665,1.0,1,,5.11
-recursive,delai-06,délais,1,1,1.0,1.0,0.8549736862585934,nan,1.0,1,,7.43
-recursive,allerg-01,allergènes,1,1,1.0,1.0,0.8677021886107282,nan,1.0,0,liste officielle affichée,7.22
-recursive,allerg-02,allergènes,1,2,0.5,0.3333333333333333,0.7927821817231703,nan,0.5,0,liste officielle affichée,9.58
-recursive,allerg-03,allergènes,1,2,0.5,0.75,0.8719633413548166,nan,0.5,0,liste officielle affichée,11.78
-recursive,allerg-04,allergènes,1,3,0.3333333333333333,0.3333333333333333,0.0,nan,nan,1,,10.13
-recursive,allerg-05,allergènes,1,1,1.0,1.0,0.9028370114994971,0.9999999999,1.0,0,liste officielle affichée,5.35
-recursive,allerg-06,allergènes,1,1,1.0,0.5,0.8865288566209868,nan,1.0,0,liste officielle affichée,8.98
-recursive,produit-01,produits,1,3,0.3333333333333333,1.0,0.8968588996337745,nan,1.0,1,,4.8
-recursive,produit-02,produits,0,0,0.0,0.2857142857142857,0.0,nan,0.0,0,"contient « 19,50 »",25.13
-recursive,produit-03,produits,1,3,0.3333333333333333,1.0,0.8623963732832006,nan,nan,1,,3.93
-recursive,produit-04,produits,0,0,0.0,1.0,0.8835594090256381,nan,0.0,0,contient « croissants »,18.62
-recursive,produit-05,produits,1,1,1.0,1.0,0.8706797322709162,0.6666666666444444,nan,1,,19.42
-recursive,produit-06,produits,0,0,0.0,0.3333333333333333,0.0,nan,0.0,0,contient « gressinis »,8.24
-recursive,cgv-01,cgv,1,1,1.0,1.0,0.8725066293105482,nan,1.0,1,,7.94
-recursive,cgv-02,cgv,1,1,1.0,1.0,0.8439195595970785,nan,1.0,1,,8.73
-recursive,cgv-03,cgv,1,1,1.0,0.5,0.8736494194738689,nan,1.0,1,,4.58
-recursive,cgv-04,cgv,1,1,1.0,1.0,0.8387634028455321,nan,1.0,1,,12.07
+recursive,delai-01,délais,1,2,0.5,1.0,0.934861219656169,0.9999999999666667,1.0,1,,35.22
+recursive,delai-02,délais,1,1,1.0,1.0,0.9043300356066241,0.8333333333055556,1.0,1,,7.26
+recursive,delai-03,délais,1,1,1.0,1.0,0.9031964056704354,0.9999999999666667,1.0,1,,6.32
+recursive,delai-04,délais,0,0,0.0,0.0,0.8921553469980629,0.0,0.0,1,,6.3
+recursive,delai-05,délais,1,6,0.16666666666666666,1.0,0.9106767428772112,0.16666666665,1.0,1,,5.11
+recursive,delai-06,délais,1,1,1.0,0.5,0.9076830689486712,0.6999999999766667,0.0,1,,7.43
+recursive,allerg-01,allergènes,1,1,1.0,1.0,0.884643983369951,0.9999999999,0.5,0,liste officielle affichée,7.22
+recursive,allerg-02,allergènes,1,2,0.5,1.0,0.888682180176474,0.5888888888692593,0.5,0,liste officielle affichée,9.58
+recursive,allerg-03,allergènes,1,2,0.5,1.0,0.9185732074646028,0.16666666665,1.0,0,liste officielle affichée,11.78
+recursive,allerg-04,allergènes,1,3,0.3333333333333333,0.6666666666666666,0.0,0.5833333333041666,0.5,1,,10.13
+recursive,allerg-05,allergènes,1,1,1.0,1.0,0.9352546614720717,0.9999999999,1.0,0,liste officielle affichée,5.35
+recursive,allerg-06,allergènes,1,1,1.0,1.0,0.9019027046684484,0.9999999999,0.5,0,liste officielle affichée,8.98
+recursive,produit-01,produits,1,3,0.3333333333333333,1.0,0.9064992345584892,0.9999999999666667,1.0,1,,4.8
+recursive,produit-02,produits,0,0,0.0,0.6,0.0,0.0,0.0,0,"contient « 19,50 »",25.13
+recursive,produit-03,produits,1,3,0.3333333333333333,1.0,0.8800336955686657,0.3333333333,1.0,1,,3.93
+recursive,produit-04,produits,0,0,0.0,1.0,0.8614366300431375,0.0,0.0,0,contient « croissants »,18.62
+recursive,produit-05,produits,1,1,1.0,1.0,0.8821230233167903,0.6666666666444444,0.0,1,,19.42
+recursive,produit-06,produits,0,0,0.0,0.3333333333333333,0.0,0.0,0.0,0,contient « gressinis »,8.24
+recursive,cgv-01,cgv,1,1,1.0,1.0,0.886526052605569,0.699999999965,1.0,1,,7.94
+recursive,cgv-02,cgv,1,1,1.0,0.3333333333333333,0.8959071575620153,0.9999999999,1.0,1,,8.73
+recursive,cgv-03,cgv,1,1,1.0,1.0,0.9210511266449061,0.8666666666377778,1.0,1,,4.58
+recursive,cgv-04,cgv,1,1,1.0,1.0,0.845359952724498,0.699999999965,0.0,1,,12.07
 recursive,livraison-01,livraison,,,,,,,,1,,17.07
 recursive,livraison-02,livraison,,,,,,,,1,,8.26
 recursive,livraison-03,livraison,,,,,,,,1,,8.02
 recursive,livraison-04,livraison,,,,,,,,1,,2.76
 recursive,piege-01,hors sujet,,,,0.0,0.0,0.0,0.0,1,,7.31
-recursive,piege-02,hors sujet,,,,0.5,0.0,nan,0.0,1,,8.13
-recursive,piege-03,hors sujet,,,,0.2,0.0,nan,0.0,1,,10.11
-recursive,piege-04,hors sujet,,,,0.3333333333333333,0.0,0.0,0.0,1,,8.3
-structure,delai-01,délais,1,5,0.2,1.0,0.88091256848057,nan,1.0,1,,4.84
-structure,delai-02,délais,1,1,1.0,1.0,0.8737688573466599,nan,1.0,1,,9.33
-structure,delai-03,délais,1,1,1.0,1.0,0.9081783973636376,nan,1.0,1,,3.88
-structure,delai-04,délais,0,0,0.0,0.6666666666666666,0.8412114378461752,0.249999999975,0.0,1,,5.85
-structure,delai-05,délais,1,6,0.16666666666666666,1.0,0.8531960457557966,nan,1.0,1,,5.51
-structure,delai-06,délais,1,1,1.0,0.6666666666666666,0.0,nan,1.0,1,,7.68
-structure,allerg-01,allergènes,1,1,1.0,1.0,0.86673520493555,nan,1.0,1,,2.73
-structure,allerg-02,allergènes,1,2,0.5,0.3333333333333333,0.7882007437200355,nan,0.5,1,,7.89
-structure,allerg-03,allergènes,1,2,0.5,0.0,0.0,nan,1.0,0,contient « poissons » ; liste officielle affichée,12.74
-structure,allerg-04,allergènes,1,2,0.5,0.3333333333333333,0.0,nan,1.0,1,,11.04
-structure,allerg-05,allergènes,1,1,1.0,1.0,0.9028370114994971,nan,1.0,1,,4.74
-structure,allerg-06,allergènes,1,1,1.0,0.75,0.8845668647299917,0.8766666666491334,1.0,1,,11.48
-structure,produit-01,produits,1,1,1.0,1.0,0.8770174153301323,nan,1.0,1,,3.84
-structure,produit-02,produits,1,1,1.0,1.0,0.9123347516636718,nan,1.0,1,,3.9
-structure,produit-03,produits,1,1,1.0,1.0,0.8582546012343305,nan,1.0,1,,3.96
-structure,produit-04,produits,0,0,0.0,1.0,0.8889660607140017,nan,0.0,0,contient « croissants »,20.57
-structure,produit-05,produits,1,4,0.25,0.8,0.8616352856391513,nan,nan,1,,10.97
-structure,produit-06,produits,1,1,1.0,0.75,0.9159770570051902,nan,1.0,1,,6.04
-structure,cgv-01,cgv,1,1,1.0,0.3333333333333333,0.8704008539038707,nan,1.0,1,,11.55
-structure,cgv-02,cgv,1,1,1.0,1.0,0.8553245036402265,nan,1.0,1,,10.52
-structure,cgv-03,cgv,1,1,1.0,0.5,0.8736494194738689,0.499999999975,1.0,1,,4.47
-structure,cgv-04,cgv,1,2,0.5,1.0,0.8422973054758424,nan,nan,1,,6.44
+recursive,piege-02,hors sujet,,,,0.3333333333333333,0.8751178796737221,0.99999999998,0.0,1,,8.13
+recursive,piege-03,hors sujet,,,,0.3333333333333333,0.8669287104341009,0.49999999995,0.0,1,,10.11
+recursive,piege-04,hors sujet,,,,0.6666666666666666,0.0,0.7222222221981481,0.0,1,,8.3
+structure,delai-01,délais,1,5,0.2,1.0,0.8826088241487163,0.6333333333122222,1.0,1,,4.84
+structure,delai-02,délais,1,1,1.0,0.6666666666666666,0.9145460498309865,0.7222222221981481,1.0,1,,9.33
+structure,delai-03,délais,1,1,1.0,1.0,0.9250696347379449,0.8333333333055556,1.0,1,,3.88
+structure,delai-04,délais,0,0,0.0,1.0,0.898141353017639,0.0,0.0,1,,5.85
+structure,delai-05,délais,1,6,0.16666666666666666,1.0,0.888134385025993,0.16666666665,1.0,1,,5.51
+structure,delai-06,délais,1,1,1.0,0.3333333333333333,0.9070660256480162,0.7555555555303703,0.0,1,,7.68
+structure,allerg-01,allergènes,1,1,1.0,1.0,0.877561033040542,0.9999999999,0.5,1,,2.73
+structure,allerg-02,allergènes,1,2,0.5,1.0,0.8207172812356675,0.9166666666361111,0.5,1,,7.89
+structure,allerg-03,allergènes,1,2,0.5,0.5,0.0,0.16666666665,0.0,0,contient « poissons » ; liste officielle affichée,12.74
+structure,allerg-04,allergènes,1,2,0.5,0.3333333333333333,0.0,0.4166666666458333,0.0,1,,11.04
+structure,allerg-05,allergènes,1,1,1.0,0.0,0.9352546614720717,0.9999999999,1.0,1,,4.74
+structure,allerg-06,allergènes,1,1,1.0,0.75,0.9358899660201806,0.9999999999,0.5,1,,11.48
+structure,produit-01,produits,1,1,1.0,1.0,0.9110062772115036,0.9999999999666667,1.0,1,,3.84
+structure,produit-02,produits,1,1,1.0,1.0,0.8988718017976348,0.699999999965,1.0,1,,3.9
+structure,produit-03,produits,1,1,1.0,1.0,0.8684577694128491,0.8333333332916666,1.0,1,,3.96
+structure,produit-04,produits,0,0,0.0,1.0,0.8623590104867839,0.0,0.0,0,contient « croissants »,20.57
+structure,produit-05,produits,1,4,0.25,0.6666666666666666,0.8944449650303866,0.8666666666377778,0.0,1,,10.97
+structure,produit-06,produits,1,1,1.0,1.0,0.9136397124901218,0.49999999995,1.0,1,,6.04
+structure,cgv-01,cgv,1,1,1.0,0.6666666666666666,0.8900283776852294,0.699999999965,1.0,1,,11.55
+structure,cgv-02,cgv,1,1,1.0,1.0,0.8597721382892679,0.7499999999625,1.0,1,,10.52
+structure,cgv-03,cgv,1,1,1.0,1.0,0.9210511266449061,0.9166666666361111,1.0,1,,4.47
+structure,cgv-04,cgv,1,2,0.5,1.0,0.8636354540110335,0.49999999995,0.0,1,,6.44
 structure,livraison-01,livraison,,,,,,,,1,,7.82
 structure,livraison-02,livraison,,,,,,,,1,,8.03
 structure,livraison-03,livraison,,,,,,,,1,,8.4
 structure,livraison-04,livraison,,,,,,,,1,,2.84
-structure,piege-01,hors sujet,,,,0.5,0.0,0.0,0.0,1,,6.35
-structure,piege-02,hors sujet,,,,0.25,0.0,nan,0.0,1,,7.69
-structure,piege-03,hors sujet,,,,0.5,0.0,nan,0.0,1,,8.12
-structure,piege-04,hors sujet,,,,0.2,0.0,nan,0.0,1,,8.52
+structure,piege-01,hors sujet,,,,0.0,0.0,0.0,0.0,1,,6.35
+structure,piege-02,hors sujet,,,,0.5,0.8755640836699269,0.81666666664625,0.0,1,,7.69
+structure,piege-03,hors sujet,,,,0.5,0.0,0.4499999999775,0.0,1,,8.12
+structure,piege-04,hors sujet,,,,0.3333333333333333,0.0,0.0,0.0,1,,8.52
